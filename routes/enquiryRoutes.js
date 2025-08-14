@@ -5,22 +5,26 @@ import { sendEnquiryNotification } from '../utils/notify.js';
 
 const router = express.Router();
 
-// @desc Create a new enquiry
-// @route POST /api/enquiries
-// @access Public
+// @desc    Create a new enquiry
+// @route   POST /api/enquiries
+// @access  Public
 router.post('/', async (req, res) => {
   try {
     const enquiry = new Enquiry(req.body);
     await enquiry.save();
+
+    // Send notification after saving
+    sendEnquiryNotification(enquiry);
+
     res.status(201).json(enquiry);
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
 });
 
-// @desc Get all enquiries (admin only)
-// @route GET /api/enquiries
-// @access Private/Admin
+// @desc    Get all enquiries (admin only)
+// @route   GET /api/enquiries
+// @access  Private/Admin
 router.get('/', protect, verifyAdmin, async (req, res) => {
   try {
     const enquiries = await Enquiry.find().sort({ createdAt: -1 });
@@ -30,9 +34,9 @@ router.get('/', protect, verifyAdmin, async (req, res) => {
   }
 });
 
-// @desc Update enquiry status
-// @route PUT /api/enquiries/:id
-// @access Private/Admin
+// @desc    Update enquiry status
+// @route   PUT /api/enquiries/:id
+// @access  Private/Admin
 router.put('/:id', protect, verifyAdmin, async (req, res) => {
   try {
     const enquiry = await Enquiry.findById(req.params.id);
@@ -47,9 +51,9 @@ router.put('/:id', protect, verifyAdmin, async (req, res) => {
   }
 });
 
-// @desc Delete an enquiry
-// @route DELETE /api/enquiries/:id
-// @access Private/Admin
+// @desc    Delete an enquiry
+// @route   DELETE /api/enquiries/:id
+// @access  Private/Admin
 router.delete('/:id', protect, verifyAdmin, async (req, res) => {
   try {
     const enquiry = await Enquiry.findById(req.params.id);
@@ -63,9 +67,4 @@ router.delete('/:id', protect, verifyAdmin, async (req, res) => {
   }
 });
 
-const enquiry = new Enquiry(req.body);
-await enquiry.save();
-sendEnquiryNotification(enquiry);
-
-res.status(201).json(enquiry);
 export default router;
