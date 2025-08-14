@@ -1,6 +1,7 @@
 import express from 'express';
 import { protect, verifyAdmin } from '../middleware/authMiddleware.js';
 import Enquiry from '../models/Enquiry.js';
+import { sendEnquiryNotification } from '../utils/notify.js';
 
 const router = express.Router();
 
@@ -62,4 +63,9 @@ router.delete('/:id', protect, verifyAdmin, async (req, res) => {
   }
 });
 
+const enquiry = new Enquiry(req.body);
+await enquiry.save();
+sendEnquiryNotification(enquiry);
+
+res.status(201).json(enquiry);
 export default router;
